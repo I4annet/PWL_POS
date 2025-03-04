@@ -11,9 +11,9 @@ class UserController extends Controller
 public function index() {
     
     $data = [
-        'level_id' => 1,
-        'username' => 'admin',
-        'nama' => 'Administrator',
+        'level_id' => 2,
+        'username' => 'manager_dua',
+        'nama' => 'Manager 2',
         'password' => Hash::make('12345')
     ];
     UserModel::create($data);
