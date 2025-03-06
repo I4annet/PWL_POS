@@ -10,8 +10,8 @@ class UserController extends Controller
 {
 public function index() {
 
-      $user = UserModel::all();
-      return view('user', ['data' => $user]);
+    $user = UserModel::with('level')->get();
+    dd($user);
     }
 
 public function tambah() {
@@ -39,11 +39,19 @@ public function ubah_simpan(Request $request, $id) {
     $user = UserModel::find($id);
     $user->username = $request->username;
     $user->nama = $request->nama;
-    $user->password = Hash::make($request->password);  // <-- new
+    $user->password = Hash::make($request->password);  
     $user->level_id = $request->level_id;
     
     $user->save();
 
     return redirect('/user');
     }
+
+public function hapus($id) {
+    $user = UserModel::find($id);
+    $user->delete();                                       // <--- tambahkan baris ini
+
+    return redirect('/user');
+    }
 }
+
