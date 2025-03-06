@@ -4,12 +4,10 @@
     <title>Data User</title>
 </head>
 <body>
-    <h1>Daftar User</h1>
+    <h1>Form Ubah Data User</h1>
     <a href="/user">Kembali</a>
     <br><br>
-    
-    <h1>Form Tambah Data User</h1>
-        <form method="post" action="/user/tambah_simpan/{{ $data->user_id}}">
+        <form method="post" action="/user/ubah_simpan/{{ $data->user_id}}">
         {{ csrf_field()}}
         {{ method_field('PUT')}}
 
