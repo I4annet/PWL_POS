@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class LevelModel extends Model
 {
-    public function user() {
-        return $this->belongsTo(UserModel::class);
-    }
-
-
+    protected $table = 'm_level';
+    protected $primaryKey = 'level_id';
 }
