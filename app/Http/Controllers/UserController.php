@@ -22,13 +22,20 @@ public function index() {
 
         $activeMenu = 'user'; // Untuk indikator menu yang sedang aktif
 
-        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'activeMenu' => $activeMenu]);
+        $level = LevelModel::all(); // Ambil semua data level
+
+        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
     }
     // Ambil data user dalam bentuk json untuk datatables 
     public function list(Request $request) 
     { 
         $users = UserModel::select('user_id', 'username', 'nama', 'level_id')
                     ->with('level');
+        
+        // Filter data user berdasarkan level_id
+        if ($request->level_id) {
+            $users->where('level_id', $request->level_id);
+        }
     
         return DataTables::of($users)
             // Menambahkan kolom index / no urut (default nama kolom: DT_RowIndex) 
