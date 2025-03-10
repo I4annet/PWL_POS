@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\UserModel;
 use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\LevelModel;
 
 class UserController extends Controller
 {
@@ -46,7 +47,41 @@ confirm(\'Apakah Anda yakit menghapus data ini?\');">Hapus</button></form>';
         }) 
         ->rawColumns(['aksi']) // memberitahu bahwa kolom aksi adalah html 
         ->make(true); 
-} 
+}
+
+    // Menampilkan halaman form tambah user
+    public function create() {
+        $breadcrumb = (object) [
+            'title' => 'Tambah User',
+            'list' => ['Home', 'User', 'Tambah']
+        ];  
+        $page = (object) [
+            'title' => 'Tambah user baru'
+        ];
+
+        $level = LevelModel::all(); // Ambil semua data level
+        $activeMenu = 'user'; // Untuk indikator menu yang sedang aktif
+
+        return view('user.create', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
+    }
+
+    // Menyimpan data user baru
+    public function store(Request $request) {
+        $request->validate([
+            'username' => 'required|string|min:3|unique:m.user,username',
+            'nama' => 'required|string|max:100', // nama maksimal 100 karakter
+            'password' => 'required|min:5', // password minimal 5 karakter
+            'level_id' => 'required|integer'  // level_id harus berupa angka
+        ]);
+
+        UserModel::create([
+            'username' => $request->username,
+            'nama' => $request->nama,
+            'password' => bcrypt($request->password),
+            'level_id' => $request->level_id
+        ]);
+        return redirect('/user')->with('success', 'Data user berhasil disimpan');
+    }
 
 }
 
