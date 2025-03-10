@@ -83,5 +83,22 @@ confirm(\'Apakah Anda yakit menghapus data ini?\');">Hapus</button></form>';
         return redirect('/user')->with('success', 'Data user berhasil disimpan');
     }
 
+    public function show(string $id) {
+        $user = UserModel::with('level')->find($id);
+
+        $breadcrumb = (object) [
+            'title' => 'Detail User',
+            'list' => ['Home', 'User', 'Detail']
+        ];
+
+        $page = (object) [
+            'title' => 'Detail user'
+        ];
+
+        $activeMenu = 'user'; // Untuk indikator menu yang sedang aktif
+
+        return view('user.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'user' => $user, 'activeMenu' => $activeMenu]);
+    }
+
 }
 
