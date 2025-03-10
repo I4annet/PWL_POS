@@ -100,5 +100,54 @@ confirm(\'Apakah Anda yakit menghapus data ini?\');">Hapus</button></form>';
         return view('user.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'user' => $user, 'activeMenu' => $activeMenu]);
     }
 
+    public function edit(string $id) {
+        $user = UserModel::find($id);
+        $level = LevelModel::all(); // Ambil semua data level
+
+        $breadcrumb = (object) [
+            'title' => 'Edit User',
+            'list' => ['Home', 'User', 'Edit']
+        ];
+
+        $page = (object) [
+            'title' => 'Edit user'
+        ];
+
+        $activeMenu = 'user'; // Untuk indikator menu yang sedang aktif
+
+        return view('user.edit', ['breadcrumb' => $breadcrumb, 'page' => $page, 'user' => $user, 'level' => $level, 'activeMenu' => $activeMenu]);
+    }
+
+    public function update(Request $request, string $id) {
+        $request->validate([
+            'username' => 'required|string|min:3|unique:m.user,username,'.$id.',user_id',
+            'nama' => 'required|string|max:100', // nama maksimal 100 karakter
+            'password' => 'nullable|min:5', // password minimal 5 karakter
+            'level_id' => 'required|integer'  // level_id harus berupa angka
+        ]);
+
+        UserModel::find($id)->update([
+            'username' => $request->username,
+            'nama' => $request->nama,
+            'password' => $request->password ? bcrypt($request->password) : UserModel::find($id)->password,
+            'level_id' => $request->level_id
+        ]);
+        return redirect('/user')->with('success', 'Data user berhasil diubah');
+    }
+
+    public function destroy(string $id) {
+        $check = UserModel::find($id);
+        if (!$check) {
+            return redirect('/user')->with('error', 'Data user tidak ditemukan');
+        }
+
+        try {
+            UserModel::destroy($id);
+            return redirect('/user')->with('success', 'Data user berhasil dihapus');
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect('/user')->with('error', 'Data user tidak bisa dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
+        }
+    }
+
 }
 
