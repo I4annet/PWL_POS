@@ -47,6 +47,11 @@
             class="nav-icon fas fa-cash-register"></i>
           <p>Transaksi Penjualan</p>
         </a> </li>
+        <li class="nav-item"> <a href="{{ url('/supplier') }}"
+          class="nav-link {{ ($activeMenu == 'supplier') ? 'active' : '' }} "> <i
+            class="nav-icon fas fa-warehouse"></i>
+          <p>Supplier Barang</p>
+        </a> </li>
     </ul>
   </nav>
 </div>
