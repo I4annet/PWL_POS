@@ -56,7 +56,7 @@
                         url: form.action,
                         type: form.method,
                         data: $(form).serialize(),
-                        success: function (response) {
+                        success: (response) => {
                             if (response.status) {
                                 $("#myModal").modal('hide');
                                 Swal.fire({
@@ -64,7 +64,6 @@
                                     title: 'Berhasil',
                                     text: response.message
                                 });
-                                dataUser.ajax.reload();
                             } else {
                                 $('.error-text').text('');
                                 $.each(response.msgfield, function (prefix, val) {
