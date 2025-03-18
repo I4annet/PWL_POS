@@ -167,7 +167,7 @@ public function index() {
     }
 
     public function create_ajax() {
-        $level = LevelModel::select('level_id', 'level_nama');
+        $level = LevelModel::all(); // Ambil semua data level
 
         return view('user.create_ajax')->with('level', $level);
     }
