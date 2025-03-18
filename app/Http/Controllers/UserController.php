@@ -167,15 +167,14 @@ public function index() {
     }
 
     public function create_ajax() {
-        $level = LevelModel::all(); // Ambil semua data level
 
-        return view('user.create_ajax')->with('level', $level);
+        return view('user.create_ajax')->with('level', LevelModel::select('level_id', 'level_nama')->get());
     }
 
 public function store_ajax(Request $request) {
     if ($request->ajax() || $request->wantsJson()) {
         $rules = [
-        'username' => 'required|string|min:3|unique:m.user,username',
+        'username' => 'required|string|min:3|unique:m_user,username',
         'nama' => 'required|string|max:100', // nama maksimal 100 karakter
         'password' => 'required|min:6', // password minimal 5 karakter
         'level_id' => 'required|integer'  // level_id harus berupa angka
@@ -199,7 +198,7 @@ public function store_ajax(Request $request) {
    
     }
 
-    redirect('/');
+    redirect('/user');
     }
 
     public function edit_ajax(string $id) {
@@ -212,7 +211,7 @@ public function store_ajax(Request $request) {
     public function update_ajax(Request $request, string $id) {
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
-                'username' => 'required|string|min:3|unique:m.user,username,'.$id.',user_id',
+                'username' => 'required|string|min:3|unique:m_user,username,'.$id.',user_id',
                 'nama' => 'required|string|max:100', // nama maksimal 100 karakter
                 'password' => 'nullable|min:6', // password minimal 5 karakter
                 'level_id' => 'required|integer'  // level_id harus berupa angka
