@@ -85,7 +85,7 @@ public function index() {
     // Menyimpan data user baru
     public function store(Request $request) {
         $request->validate([
-            'username' => 'required|string|min:3|unique:m.user,username',
+            'username' => 'required|string|min:3|unique:m_user,username',
             'nama' => 'required|string|max:100', // nama maksimal 100 karakter
             'password' => 'required|min:5', // password minimal 5 karakter
             'level_id' => 'required|integer'  // level_id harus berupa angka
@@ -238,6 +238,31 @@ public function store_ajax(Request $request) {
                 return response()->json([
                     'status' => true,
                     'message' => 'Data user berhasil diubah'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data user tidak ditemukan'
+                ]);
+            }
+        }
+        return redirect('/');
+    }
+
+    public function confirm_ajax(string $id) {
+        $user = UserModel::find($id);
+
+        return view('user.confirm_ajax', ['user' => $user]);
+    }
+
+    public function delete_ajax(Request $request, $id) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $user = UserModel::find($id);
+            if ($user) {
+                $user->delete();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data user berhasil dihapus'
                 ]);
             } else {
                 return response()->json([
