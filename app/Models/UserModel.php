@@ -19,6 +19,14 @@ class UserModel extends Model
         'password' 
     ];
 
+    protected $hidden = [
+        'password'
+    ];
+
+    protected $casts = [
+        'password' => 'hashed'
+    ];
+
     public function level() {
         return $this->belongsTo(LevelModel::class, 'level_id', 'level_id');
     }
