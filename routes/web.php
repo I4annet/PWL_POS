@@ -21,6 +21,16 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [WelcomeController::class, 'index']);
 
+    // Semua route di dalam group ini harus punya role ADM (Administrator)
+    Route::middleware(['authorize:ADM'])->group(function () {
+            Route::get('/level', [LevelController::class, 'index']);          // Menampilkan halaman awal user
+            Route::post('/level/list', [LevelController::class, 'list']);     
+            Route::get('/level/create', [LevelController::class, 'create']);   
+            Route::post('/level', [LevelController::class, 'store']);
+            Route::get('/level/{id}/edit', [LevelController::class, 'edit']);
+            Route::put('/level/{id}', [LevelController::class, 'update']);
+            Route::get('/level/{id}/', [LevelController::class, 'destroy']);
+
 
 Route::group(['prefix' => 'user'], function () {
     Route::get('/', [UserController::class, 'index']);          // Menampilkan halaman awal user
@@ -105,5 +115,6 @@ Route::group(['prefix' => 'supplier'], function () {
     Route::get('/{id}/delete_ajax', [SupplierController::class, ' confirm_ajax']);  // Menampilkan konfirmasi hapus user Ajax
     Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']);  // Menghapus data user
     Route::delete('/{id}', [SupplierController::class, 'destroy']);  // Menghapus data supplier
+});
 });
 });
