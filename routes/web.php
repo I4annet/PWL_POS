@@ -18,18 +18,31 @@ Route::get('login', [AuthController::class, 'login']) -> name('login');
 Route::post('login', [AuthController::class, 'postlogin']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [WelcomeController::class, 'index']);
 
     // Semua route di dalam group ini harus punya role ADM (Administrator)
     Route::middleware(['authorize:ADM'])->group(function () {
-            Route::get('/level', [LevelController::class, 'index']);          // Menampilkan halaman awal user
+            Route::get('/level', [LevelController::class, 'index']);         
             Route::post('/level/list', [LevelController::class, 'list']);     
             Route::get('/level/create', [LevelController::class, 'create']);   
             Route::post('/level', [LevelController::class, 'store']);
             Route::get('/level/{id}/edit', [LevelController::class, 'edit']);
             Route::put('/level/{id}', [LevelController::class, 'update']);
             Route::get('/level/{id}/', [LevelController::class, 'destroy']);
+
+    // Semua route di dalam group ini harus punya role ADM (Administrator) atau MNG (Manager)
+    Route::middleware(['authorize:ADM,MNG'])->group(function(){
+        Route::get('/barang', [BarangController::class, 'index']);
+        Route::post('/barang/list', [BarangController::class, 'list']);
+        Route::get('/barang/create_ajax', [BarangController::class, 'create_ajax']);
+        Route::post('/barang/ajax', [BarangController::class, 'store_ajax']);
+        Route::get('/barang/{id}/edit_ajax', [BarangController::class, 'edit_ajax']);
+        Route::put('/barang/{id}/update_ajax', [BarangController::class, 'update_ajax']);
+        Route::get('/barang/{id}/delete_ajax', [BarangController::class, 'confirm_ajax']);
+        Route::delete('/barang/{id}/delete_ajax', [BarangController::class, 'delete_ajax']);
+    });
 
 
 Route::group(['prefix' => 'user'], function () {
