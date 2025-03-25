@@ -15,9 +15,8 @@ class AuthorizeUser
      */
     public function handle(Request $request, Closure $next, $role = ''): Response
     {
-        $user = $request->user(); // ambil data user yg login
-        // fungsi user() diambil dari UserModel.php
-        if ($user->hasRole($role)) { // cek apakah user punya role yg diinginkan
+        $user = $request->user(); 
+        if ($user->hasRole($role)) {  
             return $next($request);
         }
 
