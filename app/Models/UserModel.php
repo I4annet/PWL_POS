@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class UserModel extends Model
+class UserModel extends Authenticatable
 {
     use HasFactory;
 
@@ -38,4 +40,8 @@ class UserModel extends Model
     public function hasRole($role) {
         return $this->level->level_kode == $role;
     }   
+
+    public function getRole() {
+        return $this->level->level_kode;
+    }
 }
