@@ -15,11 +15,13 @@ class AuthorizeUser
      */
     public function handle(Request $request, Closure $next, $role = ''): Response
     {
-        $user = $request->user();
-        if($user->hasRole($role)) {
+        $user = $request->user(); // ambil data user yg login
+        // fungsi user() diambil dari UserModel.php
+        if ($user->hasRole($role)) { // cek apakah user punya role yg diinginkan
             return $next($request);
         }
 
+        // jika tidak punya role, maka tampilkan error 403
         abort(403, 'Forbidden. Kamu tidak punya akses ke halaman ini');
     }
 }
