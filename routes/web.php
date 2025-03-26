@@ -14,6 +14,8 @@ use Monolog\Level;
 
 Route::pattern('id', '[0-9]+');
 
+Route::get('register', [AuthController::class, 'register'])->name('register');
+Route::post('register', [AuthController::class, 'store']);
 Route::get('login', [AuthController::class, 'login']) -> name('login');
 Route::post('login', [AuthController::class, 'postlogin']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
@@ -107,7 +109,7 @@ Route::group(['prefix' => 'supplier'], function () {
     Route::delete('/{id}', [SupplierController::class, 'destroy']);  // Menghapus data supplier
 
 });
-        // Semua route di dalam group ini harus punya role ADM (Administrator)
+        // Semua route di dalam group ini harus punya role ADM (Administrator) pada menu Level
         Route::middleware(['authorize:ADM'])->group(function () {
             Route::get('/level', [LevelController::class, 'index']);         
             Route::post('/level/list', [LevelController::class, 'list']);     
@@ -118,7 +120,7 @@ Route::group(['prefix' => 'supplier'], function () {
             Route::get('/level/{id}/', [LevelController::class, 'destroy']);
         });
 
-        // Route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager)
+        // Route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager) pada menu User
         Route::middleware(['authorize:ADM,MNG'])->group(function() {
             Route::get('/', [UserController::class, 'index']);   
             Route::post('/list', [UserController::class, 'list']);
@@ -130,7 +132,7 @@ Route::group(['prefix' => 'supplier'], function () {
             Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);  
         });
 
-         // Route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager)
+         // Route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager) pada menu Supplier
          Route::middleware(['authorize:ADM,MNG'])->group(function() {
             Route::get('/', [SupplierController::class, 'index']);   
             Route::post('/list', [SupplierController::class, 'list']);
@@ -142,7 +144,7 @@ Route::group(['prefix' => 'supplier'], function () {
             Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']);  
         });
 
-         // Route di dalam group ini harus punya role ADM (Administrator), MNG (Manager), dan STF (Staff)
+         // Route di dalam group ini harus punya role ADM (Administrator), MNG (Manager), dan STF (Staff) pada menu Kategori 
          Route::middleware(['authorize:ADM,MNG,STF'])->group(function() {
             Route::get('/', [KategoriController::class, 'index']);   
             Route::post('/list', [KategoriController::class, 'list']);
@@ -154,7 +156,7 @@ Route::group(['prefix' => 'supplier'], function () {
             Route::delete('/{id}/delete_ajax', [KategoriController::class, 'delete_ajax']);  
         });
 
-         // Route di dalam group ini harus punya role ADM (Administrator), MNG (Manager), dan STF (Staff)
+         // Route di dalam group ini harus punya role ADM (Administrator), MNG (Manager), dan STF (Staff) pada menu Barang
          Route::middleware(['authorize:ADM,MNG,STF'])->group(function() {
             Route::get('/', [BarangController::class, 'index']);   
             Route::post('/list', [BarangController::class, 'list']);
