@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\BarangModel;
 use App\Models\KategoriModel;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Validator;
 
 class BarangController extends Controller
 {
@@ -162,5 +163,109 @@ class BarangController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect('/barang')->with('error', 'Data barang tidak bisa dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
         }
+    }
+
+    public function create_ajax() {
+        return view('kategori.create_ajax')->with('kategori', KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama')->get()); 
+    }
+
+    public function store_ajax(Request $request) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'barang_kode' => 'required|string|min:3|unique:m_barang,barang_kode',
+                'barang_nama' => 'required|string|max:100', // nama maksimal 100 karakter
+                'harga_beli' => 'required|numeric', // harga beli harus berupa angka
+                'harga_jual' => 'required|numeric', // harga jual harus berupa angka
+                'kategori_id' => 'required|integer', // kategori_id harus berupa angka
+                'supplier_id' => 'required|integer' // supplier_id harus berupa angka
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgfield' => $validator->errors(),
+                ]);
+            }
+
+            BarangModel::create($request->all());
+            return response()->json([
+                'status' => true,
+                'message' => 'Data barang berhasil disimpan'
+            ]);
+        }
+
+        return redirect('/barang'); // Adjust the redirect path as necessary
+    }
+
+    public function edit_ajax(string $id) {
+        $barang = BarangModel::find($id);
+        $kategori = KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama')->get(); // Ambil semua data level
+
+        return view('barang.edit_ajax', ['barang' => $barang, 'kategori' => $kategori]);
+    }
+
+    public function update_ajax(Request $request, string $id) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'barang_kode' => 'required|string|min:3|unique:m_barang,barang_kode,'.$id.',barang_id',
+                'barang_nama' => 'required|string|max:100', // nama maksimal 100 karakter
+                'harga_beli' => 'required|numeric', // harga beli harus berupa angka
+                'harga_jual' => 'required|numeric', // harga jual harus berupa angka
+                'kategori_id' => 'required|integer', // kategori_id harus berupa angka
+                'supplier_id' => 'required|integer' // supplier_id harus berupa angka
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgfield' => $validator->errors(),
+                ]);
+            }
+
+            $barang = BarangModel::find($id);
+            if ($barang) {
+                $barang->update($request->all());
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data barang berhasil diubah'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data barang tidak ditemukan'
+                ]);
+            }
+        }
+        return redirect('/'); // Adjust the redirect path as necessary
+    }
+
+    public function confirm_ajax(string $id) {
+        $barang = BarangModel::find($id);
+        return view('barang.confirm_ajax', ['barang' => $barang]); // Adjust the view path as necessary
+    }
+
+    public function delete_ajax(Request $request, $id) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $barang = BarangModel::find($id);
+            if ($barang) {
+                $barang->delete();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data barang berhasil dihapus'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data barang tidak ditemukan'
+                ]);
+            }
+        }
+        return redirect('/barang'); // Adjust the redirect path as necessary
     }
 }

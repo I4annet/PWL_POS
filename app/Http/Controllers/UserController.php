@@ -249,9 +249,7 @@ public function store_ajax(Request $request) {
     }
 
     public function confirm_ajax(string $id) {
-        $user = UserModel::find($id);
-
-        return view('user.confirm_ajax', ['user' => $user]);
+        return view('user.confirmajax', ['user' => UserModel::find($id)]);   
     }
 
     public function delete_ajax(Request $request, $id) {
@@ -270,7 +268,7 @@ public function store_ajax(Request $request) {
                 ]);
             }
         }
-        return redirect('/');
+        return redirect('/user');
     }
 }
 

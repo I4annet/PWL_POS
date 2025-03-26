@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SupplierModel;
 use Yajra\DataTables\Facades\DataTables;
-use App\Models\LevelModel; // Import LevelModel if needed
+use App\Models\LevelModel;
+use App\Models\KategoriModel;
+use App\Models\BarangModel;
+use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
 {
@@ -171,5 +174,99 @@ class SupplierController extends Controller
         } catch (\Illuminate\Database\QueryException $e) {
             return redirect('/supplier')->with('error', 'Data supplier tidak bisa dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
         }
+    }
+
+    public function create_ajax() {
+        return view('supplier.create_ajax'); // Adjust the view path as necessary
+    }
+
+    public function store_ajax(Request $request) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'supplier_kode' => 'required|string|min:3|unique:m_supplier,supplier_kode',
+                'nama_supplier' => 'required|string|max:100', // nama maksimal 100 karakter
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgfield' => $validator->errors(),
+                ]);
+            }
+
+            SupplierModel::create($request->all());
+            return response()->json([
+                'status' => true,
+                'message' => 'Data supplier berhasil disimpan'
+            ]);
+        }
+
+        return redirect('/supplier'); // Adjust the redirect path as necessary
+    }
+
+    public function edit_ajax(string $id) {
+        $supplier = SupplierModel::find($id);
+        return view('supplier.edit_ajax', ['supplier' => $supplier]); // Adjust the view path as necessary
+    }
+
+    public function update_ajax(Request $request, string $id) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'supplier_kode' => 'required|string|min:3|unique:m_supplier,supplier_kode,'.$id.',id',
+                'nama_supplier' => 'required|string|max:100', // nama maksimal 100 karakter
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgfield' => $validator->errors(),
+                ]);
+            }
+
+            $supplier = SupplierModel::find($id);
+            if ($supplier) {
+                $supplier->update($request->all());
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data supplier berhasil diubah'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data supplier tidak ditemukan'
+                ]);
+            }
+        }
+        return redirect('/supplier'); // Adjust the redirect path as necessary
+    }
+
+    public function confirm_ajax(string $id) {
+        $supplier = SupplierModel::find($id);
+        return view('supplier.confirm_ajax', ['supplier' => $supplier]); // Adjust the view path as necessary
+    }
+
+    public function delete_ajax(Request $request, $id) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $supplier = SupplierModel::find($id);
+            if ($supplier) {
+                $supplier->delete();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data supplier berhasil dihapus'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data supplier tidak ditemukan'
+                ]);
+            }
+        }
+        return redirect('/supplier'); // Adjust the redirect path as necessary
     }
 }
