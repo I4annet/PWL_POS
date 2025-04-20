@@ -14,7 +14,7 @@
     </div> 
 </div> 
 @else 
-<form action="{{ url('/user/' . $user->user_id.'/update_ajax') }}" method="POST" id="form-edit"> 
+<form action="{{ url('/user/' . $user->user_id .'/update_ajax') }}" method="POST" id="form-edit"> 
 @csrf 
 @method('PUT') 
 <div id="modal-master" class="modal-dialog modal-lg" role="document"> 
@@ -29,30 +29,25 @@
                 <select name="level_id" id="level_id" class="form-control" required> 
                     <option value="">- Pilih Level -</option> 
                     @foreach($level as $l) 
-                        <option {{ ($l->level_id == $user->level_id)? 'selected' : '' }} 
-value="{{ $l->level_id }}">{{ $l->level_nama }}</option> 
+                        <option {{ ($l->level_id == $user->level_id)? 'selected' : '' }} value="{{ $l->level_id }}">{{ $l->level_nama }}</option> 
                     @endforeach 
                 </select> 
                 <small id="error-level_id" class="error-text form-text text-danger"></small>
             </div>
             <div class="form-group"> 
                 <label>Username</label> 
-                <input value="{{ $user->username }}" type="text" name="username" 
-id="username" class="form-control" required> 
-                <small id="error-username" class="error-text form-text text
-danger"></small> 
+                <input value="{{ $user->username }}" type="text" name="username" id="username" class="form-control" required> 
+                <small id="error-username" class="error-text form-text text-danger"></small> 
             </div> 
             <div class="form-group"> 
                 <label>Nama</label> 
-                <input value="{{ $user->nama }}" type="text" name="nama" id="nama" 
-class="form-control" required> 
+                <input value="{{ $user->nama }}" type="text" name="nama" id="nama" class="form-control" required> 
                 <small id="error-nama" class="error-text form-text text-danger"></small> 
             </div> 
             <div class="form-group"> 
                 <label>Password</label> 
                 <input value="" type="password" name="password" id="password" class="form-control"> 
-                <small class="form-text text-muted">Abaikan jika tidak ingin ubah 
-password</small> 
+                <small class="form-text text-muted">Abaikan jika tidak ingin ubah password</small> 
                 <small id="error-password" class="error-text form-text text-danger"></small> 
             </div> 
         </div> 
@@ -72,12 +67,12 @@ password</small>
                     nama: {required: true, minlength: 3, maxlength: 100}, 
                     password: {minlength: 6, maxlength: 20} 
                 }, 
-                submitHandler: function(form) { 
+                submitHandler:(form) => { 
                     $.ajax({ 
                         url: form.action, 
                         type: form.method, 
                         data: $(form).serialize(), 
-                        success: function(response) { 
+                        success: (response) => { 
                             if(response.status){ 
                                 $('#myModal').modal('hide'); 
                                 Swal.fire({ 

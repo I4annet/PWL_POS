@@ -24,7 +24,7 @@
                         <select class="form-control" id="supplier_filter" name="supplier_filter" required>
                             <option value="">- Semua -</option>
                             @foreach($supplier as $item)
-                                <option value="{{ $item->id }}">{{ $item->nama_supplier }}</option>
+                                <option value="{{ $item->supplier_id }}">{{ $item->nama_supplier }}</option>
                             @endforeach
                         </select>
                         <small class="form-text text-muted">Level Supplier</small>
@@ -35,7 +35,7 @@
         <table class="table table-bordered table-striped table-hover table-sm" id="table_supplier">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>No</th>
                     <th>Kode Supplier</th>
                     <th>Nama Supplier</th>
                     <th>Aksi</th>
@@ -66,7 +66,7 @@
                 "dataType": "json",
                 "type": "POST",
                 "data": function (d) {
-                    d.level_id = $('#supplier_filter').val();
+                    d.supplier_id = $('#supplier_filter').val();
                 }
             },
             columns: [

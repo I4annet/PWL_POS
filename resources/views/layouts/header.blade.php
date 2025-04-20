@@ -11,7 +11,6 @@
         <a href="#" class="nav-link">Contact</a>
       </li>
     </ul>
-
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
       <!-- Navbar Search -->
@@ -131,12 +130,24 @@
           <i class="fas fa-th-large"></i>
         </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link d-flex align-items-center logout-link" href="{{ url('/logout') }}">
-            <i class="fas fa-sign-out-alt"></i>
-            <span class="logout-text ml-2">Logout</span>
+      <li class="nav-item dropdown d-flex align-items-center ml-3">
+        <a class="nav-link p-0" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+          <img 
+            src="{{ Auth::user()->image ? asset('storage/profile/' . Auth::user()->image) : asset('storage/profile/default-user.png') }}" 
+            class="rounded-circle" 
+            alt="User Image" 
+            style="width: 35px; height: 35px; object-fit: cover; border: 2px solid #ccc;">
         </a>
-    </li>
-    </ul>
+        <div class="dropdown-menu dropdown-menu-right">
+          <a href="{{ url('/profile') }}" class="dropdown-item">
+            <i class="fas fa-user mr-2"></i> Profil Saya
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="{{ url('/logout') }}" class="dropdown-item">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+          </a>
+        </div>
+      </li>
+      
   </nav>
   <!-- /.navbar -->

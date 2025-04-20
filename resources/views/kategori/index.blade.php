@@ -6,6 +6,7 @@
         <h3 class="card-title">{{ $page->title }}</h3>
         <div class="card-tools">
             <a class="btn btn-sm btn-primary mt-1" href="{{ url('kategori/create') }}">Tambah</a>
+            <button onclick="modalAction('{{ url('kategori/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
         </div>
     </div>
     <div class="card-body">
@@ -23,7 +24,7 @@
                         <select class="form-control" id="kategori_id" name="kategori_id" required>
                             <option value="">- Semua -</option>
                             @foreach ($kategori as $item)
-                                <option value="{{ $item->id }}">{{ $item->kategori_nama }}</option>
+                                <option value="{{ $item->kategori_id }}">{{ $item->kategori_nama }}</option>
                             @endforeach
                         </select>
                         <small class="form-text text-muted">Kategori Barang</small>
@@ -43,6 +44,8 @@
         </table>
     </div>
 </div>
+<div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" data-width="75%" aria-hidden="true"></div>
+
 @endsection
 
 @push('css')
@@ -50,6 +53,12 @@
 
 @push('js')
 <script>
+    function modalAction(url = '') {
+        $('#myModal').load(url, function() {
+            $('#myModal').modal('show');
+        });
+    }
+
     $(document).ready(function() {
         var dataKategori = $('#table_kategori').DataTable({
             serverSide: true,
@@ -58,7 +67,7 @@
                 "dataType": "json",
                 "type": "POST",
                 "data": function (d) {
-                    d.kategori_id = $('#kategori_id').val();
+                    d.kategori_id = $('#kategori_id').val(); // Adjusted to match the filter ID
                 }
             },
             columns: [
@@ -92,7 +101,6 @@
         $('#kategori_id').on('change', function() {
             dataKategori.ajax.reload();
         });
-        
     });
 </script>
 @endpush

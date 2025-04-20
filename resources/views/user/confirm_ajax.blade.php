@@ -14,7 +14,7 @@
         </div> 
     </div> 
 @else 
-    <form action="{{ url('/user/'. $user->user_id .'/delete_ajax') }}" method="POST" id="form-delete"> 
+    <form action="{{ url('/user/'. $user->user_id.'/delete_ajax') }}" method="POST" id="form-delete"> 
     @csrf 
     @method('DELETE') 
     <div id="modal-master" class="modal-dialog modal-lg" role="document"> 
@@ -42,50 +42,35 @@
     </div> 
     </form> 
     <script> 
-        $(document).ready(function() { 
-            $("#form-delete").validate({ 
-                rules: {}, 
-                submitHandler:(form) => { 
+       $(document).ready(() => {
+            $("#form-delete").validate({
+                rules: {},
+                submitHandler: (form) => {
                     $.ajax({
-                        url: form.action, 
-                        type: form.method, 
-                        data: $(form).serialize(), 
-                        success:(response) => { 
-                            if(response.status){ 
-                                $('#myModal').modal('hide'); 
-                                Swal.fire({ 
-                                    icon: 'success', 
-                                    title: 'Berhasil', 
-                                    text: response.message 
-                                }); 
-                                dataUser.ajax.reload(); 
-                            }else{ 
-                                $('.error-text').text(''); 
-                                $.each(response.msgField, function(prefix, val) { 
-                                    $('#error-'+prefix).text(val[0]); 
-                                }); 
-                                Swal.fire({ 
-                                    icon: 'error', 
-                                    title: 'Terjadi Kesalahan', 
-                                    text: response.message 
-                                }); 
-                            } 
-                        }             
-                    }); 
-                    return false; 
-                }, 
-                errorElement: 'span', 
-                errorPlacement: function (error, element) { 
-                    error.addClass('invalid-feedback'); 
-                    element.closest('.form-group').append(error); 
-                }, 
-                highlight: function (element, errorClass, validClass) { 
-                    $(element).addClass('is-invalid'); 
-                }, 
-                unhighlight: function (element, errorClass, validClass) { 
-                    $(element).removeClass('is-invalid'); 
-                } 
-            }); 
-        }); 
-    </script> 
+                        url: form.action,
+                        type: form.method,
+                        data: $(form).serialize(),
+                        success: (response) => {
+                            if (response.status) {
+                                $('#my-modal').modal('hide');
+                                Swal.fire({ icon: 'success', title: 'Berhasil', text: response.message });
+                            } else {
+                                $('.error-text').text('');
+                                $.each(response.message_field, (prefix, val) => $('#error-' + prefix).text(val[0]));
+                                Swal.fire({ icon: 'error', title: 'Terjadi Kesalahan', text: response.message });
+                            }
+                        }
+                    });
+                    return false;
+                },
+                errorElement: 'span',
+                errorPlacement: (error, element) => {
+                    error.addClass('invalid-feedback');
+                    element.closest('.form-group').append(error);
+                },
+                highlight: (element) => $(element).addClass('is-invalid'),
+                unhighlight: (element) => $(element).removeClass('is-invalid'),
+            });
+        });
+    </script>
 @endempty
