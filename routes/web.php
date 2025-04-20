@@ -182,6 +182,11 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
         Route::middleware('authorize:ADM,MNG')->group(function() {
             Route::get('/stok', [StokController::class, 'index']);
             Route::post('/stok/list', [StokController::class, 'list']);
+            Route::get('/stok/import', [StokController::class, 'import']);
+            Route::post('/stok/import_ajax', [StokController::class, 'import_ajax']);
+            Route::get('/stok/export_excel', [StokController::class, 'export_excel']);
+            Route::get('/stok/export_pdf', [StokController::class, 'export_pdf']); 
+
         });
 
         Route::middleware('authorize:ADM,MNG,STF')->group(function() {
