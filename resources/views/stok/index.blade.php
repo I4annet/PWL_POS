@@ -6,8 +6,8 @@
             <h3 class="card-title">Daftar Stok Barang</h3>
             <div class="card-tools">
                 <button onclick="modalAction('{{ url('/stok/import') }}')" class="btn btn-sm btn-info mt-1">Import Stok</button>
-                <a href="{{ url('/stok/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-excel"></i> Export Stok</a>
-                <a href="{{ url('/stok/export_pdf') }}" class="btn btn-sm btn-warning mt-1"><i class="fa fa-file-pdf"></i> Export Barang</a> 
+                <a href="{{ url('/stok/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-excel"></i> Export Excel Stok</a>
+                <a href="{{ url('/stok/export_pdf') }}" class="btn btn-sm btn-warning mt-1"><i class="fa fa-file-pdf"></i> Export PDF Stok</a> 
                 <button onclick="modalAction('{{ url('/stok/create_ajax') }}')" class="btn btn-sm btn-success mt-1">
                     Tambah Stok (Ajax)
                 </button>
@@ -21,7 +21,7 @@
                         <div class="form-group form-group-sm row text-sm mb-0">
                             <label for="filter_barang" class="col-md-1 col-form-label">Filter</label>
                             <div class="col-md-3">
-                                <select name="filter_barang" class="form-control form-control-sm filter_barang">
+                                <select name="barang_id" class="form-control" id="barang_id" required>
                                     <option value="">- Semua Barang -</option>
                                     @foreach ($barang as $b)
                                         <option value="{{ $b->barang_id }}">{{ $b->barang_nama }}</option>
@@ -44,10 +44,11 @@
                 <thead>
                     <tr>
                         <th>No</th>
+                        <th>Nama Supplier</th>
                         <th>Nama Barang</th>
-                        <th>Tanggal</th>
+                        <th>Nama User</th>
+                        <th>Stok Tanggal</th>
                         <th>Jumlah</th>
-                        <th>Keterangan</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -76,15 +77,16 @@
                     url: "{{ url('stok/list') }}",
                     type: "POST",
                     data: function(d) {
-                        d.filter_barang = $('.filter_barang').val();
+                        d.barang_id = $('#barang_id').val();
                     }
                 },
                 columns: [
                     { data: "DT_RowIndex", className: "text-center", width: "5%", orderable: false, searchable: false },
-                    { data: "barang.barang_nama", width: "25%" },
+                    { data: "supplier.supplier_nama", width: "15%" },
+                    { data: "barang.barang_nama", width: "15%" },
+                    { data: "user.username", width: "15%" },
                     { data: "stok_tanggal", width: "15%" },
                     { data: "stok_jumlah", className: "text-right", width: "10%" },
-                    { data: "stok_keterangan", width: "15%" },
                     { data: "aksi", className: "text-center", width: "15%", orderable: false, searchable: false }
                 ]
             });
@@ -97,6 +99,10 @@
 
             $('.filter_barang').change(function() {
                 tableStok.draw();
+            });
+
+            $('#barang_id').on('change', function() {
+                tableBarang.ajax.reload();
             });
         });
     </script>
