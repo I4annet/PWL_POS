@@ -33,27 +33,28 @@ class SupplierController extends Controller
         ]);
     }
 
-    // Ambil data supplier dalam bentuk JSON untuk DataTables 
-    public function list(Request $request) { 
-        $supplier = SupplierModel::select('id', 'supplier_kode', 'nama_supplier');
-
+    public function list(Request $request) 
+    { 
+        $supplier = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama', 'supplier_alamat');
+    
         return DataTables::of($supplier)
             ->addIndexColumn()
             ->addColumn('aksi', function ($supplier) {  
-                $btn  = '<a href="'.url('/supplier/' . $supplier->id).'" class="btn btn-info btn-sm">Detail</a> ';
-                $btn .= '<a href="'.url('/supplier/' . $supplier->id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
-                $btn .= '<form class="d-inline-block" method="POST" action="'.url('/supplier/'.$supplier->id).'">'
+                $btn  = '<a href="'.url('/supplier/' . $supplier->supplier_id).'" class="btn btn-info btn-sm">Detail</a> ';
+                $btn .= '<a href="'.url('/supplier/' . $supplier->supplier_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
+                $btn .= '<form class="d-inline-block" method="POST" action="'.url('/supplier/'.$supplier->supplier_id).'">'
                         . csrf_field() . method_field('DELETE') .  
                         '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">
                             Hapus
                         </button>
                     </form>';      
-
+    
                 return $btn; 
             })
             ->rawColumns(['aksi']) 
             ->make(true); 
     }
+    
 
     // Menampilkan halaman form tambah supplier
     public function create() {
@@ -146,7 +147,7 @@ class SupplierController extends Controller
     public function update(Request $request, string $id) {
         $request->validate([
             'supplier_kode' => 'required|string|min:3|unique:m_supplier,supplier_kode,'.$id.',id', // Adjusted for unique validation
-            'nama_supplier' => 'required|string|max:100', // nama maksimal 100 karakter
+            'supplier_nama' => 'required|string|max:100', // nama maksimal 100 karakter
         ]);
 
         $supplier = SupplierModel::find($id);
@@ -177,14 +178,15 @@ class SupplierController extends Controller
     }
 
     public function create_ajax() {
-        return view('supplier.create_ajax'); // Adjust the view path as necessary
+        return view('supplier.create_ajax'); 
     }
 
     public function store_ajax(Request $request) {
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
                 'supplier_kode' => 'required|string|min:3|unique:m_supplier,supplier_kode',
-                'nama_supplier' => 'required|string|max:100', // nama maksimal 100 karakter
+                'supplier_nama' => 'required|string|max:100', 
+                'supplier_alamat' => 'required|string|max:255',
             ];
 
             $validator = Validator::make($request->all(), $rules);
@@ -216,7 +218,8 @@ class SupplierController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
                 'supplier_kode' => 'required|string|min:3|unique:m_supplier,supplier_kode,'.$id.',id',
-                'nama_supplier' => 'required|string|max:100', // nama maksimal 100 karakter
+                'supplier_nama' => 'required|string|max:100', 
+                'supplier_alamat' => 'nullable|string|max:255',
             ];
 
             $validator = Validator::make($request->all(), $rules);
