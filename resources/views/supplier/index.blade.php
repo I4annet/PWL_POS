@@ -5,39 +5,42 @@
     <div class="card-header">
         <h3 class="card-title">{{ $page->title }}</h3>
         <div class="card-tools">
-            <a class="btn btn-sm btn-primary mt-1" href="{{ url('supplier/create') }}">Tambah</a>
+            <button onclick="modalAction('{{ url('/supplier/import') }}')" class="btn btn-sm btn-info mt-1">Import Data Supplier</button>
+                <a href="{{ url('/supplier/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-excel"></i> Export Excel Supplier</a>
+                <a href="{{ url('/supplier/export_pdf') }}" class="btn btn-sm btn-warning mt-1"><i class="fa fa-file-pdf"></i> Export PDF Supplier</a> 
             <button onclick="modalAction('{{ url('supplier/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Ajax</button>
         </div>
     </div>
     <div class="card-body">
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group row">
                     <label class="col-1 control-label col-form-label">Filter:</label>
                     <div class="col-3">
-                        <select class="form-control" id="supplier_filter" name="supplier_filter" required>
+                        <select class="form-control" id="supplier_id" name="supplier_id" required>
                             <option value="">- Semua -</option>
                             @foreach($supplier as $item)
-                                <option value="{{ $item->supplier_id }}">{{ $item->nama_supplier }}</option>
+                                <option value="{{ $item->supplier_id }}">{{ $item->supplier_nama }}</option>
                             @endforeach
                         </select>
-                        <small class="form-text text-muted">Level Supplier</small>
+                        <small class="form-text text-muted">Filter Supplier</small>
                     </div>
                 </div>
             </div>
         </div>
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
         <table class="table table-bordered table-striped table-hover table-sm" id="table_supplier">
             <thead>
                 <tr>
                     <th>No</th>
                     <th>Kode Supplier</th>
                     <th>Nama Supplier</th>
+                    <th>Alamat Supplier</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -66,20 +69,31 @@
                 "dataType": "json",
                 "type": "POST",
                 "data": function (d) {
-                    d.supplier_id = $('#supplier_filter').val();
+                    d.supplier_id = $('#supplier_id').val();
                 }
             },
             columns: [
                 { data: "DT_RowIndex", className: "text-center", orderable: false, searchable: false },
                 { data: "supplier_kode", className: "", orderable: true, searchable: true },
-                { data: "nama_supplier", className: "", orderable: true, searchable: true },
+                { data: "supplier_nama", className: "", orderable: true, searchable: true },
+                { data: "supplier_alamat", className: "", orderable: true, searchable: true },
                 { data: "aksi", className: "", orderable: false, searchable: false }
             ]
         });
 
-        $('#supplier_filter').on('change', function() {
-            dataSupplier.ajax.reload();
+        $('#table-supplier_filter input').unbind().bind().on('keyup', function(e) {
+                if (e.keyCode == 13) { // enter key
+                    tableBarang.search(this.value).draw();
+                }
+            });
+
+        $('.filter_supplier').on('change', function() {
+            tableSupplier.ajax.reload();
         });
+
+        $('#supplier_id').on('change', function() {
+                tableSupplier.ajax.reload();
+            });
     });
 </script>
 @endpush

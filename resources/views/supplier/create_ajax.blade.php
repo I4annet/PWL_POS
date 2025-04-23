@@ -16,9 +16,13 @@
                 </div>
                 <div class="form-group">
                     <label>Nama Supplier</label>
-                    <input value="" type="text" name="nama_supplier" id="nama_supplier" class="form-control" required>
-                    <small id="error-nama_supplier" class="error-text form-text text-danger"></small>
+                    <input value="" type="text" name="supplier_nama" id="supplier_nama" class="form-control" required>
+                    <small id="error-supplier_nama" class="error-text form-text text-danger"></small>
                 </div>
+                <div class="form-group">
+                    <label>Alamat</label>
+                    <input value="" type="text" name="supplier_alamat" id="supplier_alamat" class="form-control" required>
+                    <small id="error-supplier_alamat" class="error-text form-text text-danger"></small>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
@@ -33,7 +37,8 @@
         $("#form-tambah-supplier").validate({
             rules: {
                 supplier_kode: { required: true, minlength: 3, maxlength: 20 },
-                nama_supplier: { required: true, minlength: 3, maxlength: 100 }
+                supplier_nama: { required: true, minlength: 3, maxlength: 100 },
+                supplier_alamat: { required: true, minlength: 3, maxlength: 100 }
             },
             submitHandler: function (form) {
                 $.ajax({
@@ -48,7 +53,6 @@
                                 title: 'Berhasil',
                                 text: response.message
                             });
-                            // Optionally, reload the supplier table or perform other actions
                             $('#table_supplier').DataTable().ajax.reload();
                         } else {
                             $('.error-text').text('');

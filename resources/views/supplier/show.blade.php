@@ -16,7 +16,7 @@
             <table class="table table-bordered table-striped table-hover table-sm"> 
                 <tr> 
                     <th>ID</th> 
-                    <td>{{ $supplier->id }}</td> 
+                    <td>{{ $supplier->supplier_id }}</td> 
                 </tr> 
                 <tr> 
                     <th>Kode Supplier</th> 
@@ -24,8 +24,12 @@
                 </tr> 
                 <tr> 
                     <th> Nama Supplier</th> 
-                    <td>{{ $supplier->nama_supplier }}</td> 
+                    <td>{{ $supplier->supplier_nama }}</td> 
                 </tr> 
+                <tr> 
+                    <th>Alamat</th> 
+                    <td>{{ $supplier->supplier_alamat }}</td>
+                </tr>
             </table> 
         @endempty 
         <a href="{{ url('supplier') }}" class="btn btn-sm btn-default mt-2">Kembali</a> 
