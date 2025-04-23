@@ -48,6 +48,7 @@
                                 title: 'Berhasil',
                                 text: response.message
                             });
+                            $('#table_level').DataTable().ajax.reload();
                         } else {
                             $('.error-text').text('');
                             $.each(response.msgfield, function (prefix, val) {
