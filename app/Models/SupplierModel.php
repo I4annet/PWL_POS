@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class SupplierModel extends Model
 {
     protected $table = 'm_supplier';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'supplier_id';
 
     protected $fillable = [
-        'id',
+        'supplier_id',
         'supplier_kode',
-        'nama_supplier',
+        'supplier_nama',
+        'supplier_alamat',
     ];
 }

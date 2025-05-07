@@ -48,7 +48,6 @@
                                 title: 'Berhasil',
                                 text: response.message
                             });
-                            // Optionally, reload the kategori table or perform other actions
                             $('#table_kategori').DataTable().ajax.reload();
                         } else {
                             $('.error-text').text('');

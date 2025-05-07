@@ -36,6 +36,14 @@ class UserSeeder extends Seeder
                 'nama' => 'Staff/Kasir',
                 'password' => Hash::make('12345'),
             ]
+            ,
+            [
+                'user_id' => 4,
+                'level_id' => 4,
+                'username' => 'customer',
+                'nama' => 'Customer/Pelanggan',
+                'password' => Hash::make('12345'),
+            ],
         ];
         DB::table('m_user')->insert($data);
     }

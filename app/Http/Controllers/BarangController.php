@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BarangModel;
+use App\Models\SupplierModel;
 use App\Models\KategoriModel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -32,17 +34,19 @@ class BarangController extends Controller
         $barang = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual', 'kategori_id', 'supplier_id')
                     ->with('kategori');
 
+        if ($request->kategori_id) {
+            $barang->where('kategori_id', $request->kategori_id);
+        }
+
         return DataTables::of($barang)
             ->addIndexColumn()
             ->addColumn('aksi', function ($barang) {  
-                $btn  = '<a href="'.url('/barang/' . $barang->barang_id).'" class="btn btn-info btn-sm">Detail</a> ';
-                $btn .= '<a href="'.url('/barang/' . $barang->barang_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
-                $btn .= '<form class="d-inline-block" method="POST" action="'.url('/barang/'.$barang->barang_id).'">'
-                        . csrf_field() . method_field('DELETE') .  
-                        '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">
-                            Hapus
-                        </button>
-                    </form>';      
+                $btn  = '<button onclick="modalAction(\''.url('/barang/' . $barang->barang_id . 
+                '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button> '; 
+                            $btn .= '<button onclick="modalAction(\''.url('/barang/' . $barang->barang_id . 
+                '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button> '; 
+                            $btn .= '<button onclick="modalAction(\''.url('/user/' . $barang->barang_id . 
+                '/delete_ajax').'\')"  class="btn btn-danger btn-sm">Hapus</button> '; 
 
                 return $btn; 
             })
@@ -167,18 +171,21 @@ class BarangController extends Controller
     }
 
     public function create_ajax() {
-        return view('kategori.create_ajax')->with('kategori', KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama')->get()); 
+        $supplier = SupplierModel::select('supplier_id', 'supplier_nama')->get(); 
+        $kategori = KategoriModel::select('kategori_id', 'kategori_kode', 'kategori_nama')->get(); 
+        
+        return view('barang.create_ajax', compact('kategori', 'supplier')); 
     }
 
     public function store_ajax(Request $request) {
         if ($request->ajax() || $request->wantsJson()) {
             $rules = [
                 'barang_kode' => 'required|string|min:3|unique:m_barang,barang_kode',
-                'barang_nama' => 'required|string|max:100', // nama maksimal 100 karakter
-                'harga_beli' => 'required|numeric', // harga beli harus berupa angka
-                'harga_jual' => 'required|numeric', // harga jual harus berupa angka
-                'kategori_id' => 'required|integer', // kategori_id harus berupa angka
-                'supplier_id' => 'required|integer' // supplier_id harus berupa angka
+                'barang_nama' => 'required|string|max:100', 
+                'harga_beli' => 'required|numeric', 
+                'harga_jual' => 'required|numeric', 
+                'kategori_id' => 'required|integer', 
+                'supplier_id' => 'required|integer' 
             ];
 
             $validator = Validator::make($request->all(), $rules);
@@ -243,12 +250,12 @@ class BarangController extends Controller
                 ]);
             }
         }
-        return redirect('/'); // Adjust the redirect path as necessary
+        return redirect('/'); 
     }
 
     public function confirm_ajax(string $id) {
         $barang = BarangModel::find($id);
-        return view('barang.confirm_ajax', ['barang' => $barang]); // Adjust the view path as necessary
+        return view('barang.confirm_ajax', ['barang' => $barang]); 
     }
 
     public function delete_ajax(Request $request, $id) {
@@ -333,6 +340,77 @@ class BarangController extends Controller
             }
         }
         return redirect('/');
+    }
+
+    public function export_excel() {
+        $barang = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual', 'kategori_id')
+                    ->orderBy('kategori_id')
+                    ->with('kategori')
+                    ->get();
+        
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kode Barang');
+        $sheet->setCellValue('C1', 'Nama Barang');
+        $sheet->setCellValue('D1', 'Harga Beli');
+        $sheet->setCellValue('E1', 'Harga Jual');
+        $sheet->setCellValue('F1', 'Kategori');
+
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+
+        $no = 1;
+        $baris = 2;
+
+        foreach ($barang as $value) {
+            $sheet->setCellValue('A'.$baris, $no);
+            $sheet->setCellValue('B'.$baris, $value->barang_kode);
+            $sheet->setCellValue('C'.$baris, $value->barang_nama);
+            $sheet->setCellValue('D'.$baris, $value->harga_beli);
+            $sheet->setCellValue('E'.$baris, $value->harga_jual);
+            $sheet->setCellValue('F'.$baris, $value->kategori->kategori_nama);
+
+            $baris++;
+            $no++;
+
+        }
+
+        foreach(range('A', 'F') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $sheet->setTitle('Data Barang');
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data_Barang_'.date('Y-m-d_H-i-s').'.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+        
+        $writer->save('php://output');
+        
+        exit;
+    }
+
+    public function export_pdf() {
+        $barang = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual', 'kategori_id')
+                    ->orderBy('kategori_id')
+                    ->with('kategori')
+                    ->get();
+
+        $pdf = Pdf::loadView('barang.export_pdf', ['barang' => $barang]);
+        $pdf->setPaper('a4', 'potrait');
+        $pdf->setOption("isRemoteEnabled", true);
+        $pdf->render();
+
+        return $pdf->stream('Data_Barang_'.date('Y-m-d_H:is').'.pdf');
     }
     
     }

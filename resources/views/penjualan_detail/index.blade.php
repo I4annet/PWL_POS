@@ -1,13 +1,13 @@
 @extends('layouts.template')
 
 @section('content')
-    <div class="card card-outline card-primary">
+    <div class="card">
         <div class="card-header">
-            <h3 class="card-title">{{$page->title}}</h3>
+            <h3 class="card-title">Daftar Penjualan</h3>
             <div class="card-tools">
                 <button onclick="modalAction('{{ url('/penjualan/import') }}')" class="btn btn-sm btn-info mt-1">Import Penjualan</button>
                 <a href="{{ url('/penjualan/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-excel"></i> Export Penjualan</a>
-                <a href="{{ url('/penjualan/export_pdf') }}" class="btn btn-sm btn-warning mt-1"><i class="fa fa-file-pdf"></i> Export Penjualan</a>
+                <a href="{{ url('/penjualan/export_pdf') }}" class="btn btn-sm btn-danger mt-1"><i class="fa fa-file-pdf"></i> Export Penjualan</a>
                 <button onclick="modalAction('{{ url('/penjualan/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah Penjualan (Ajax)</button>
             </div>
         </div>
@@ -26,7 +26,7 @@
                         <th>Kode Penjualan</th>
                         <th>Nama Pembeli</th>
                         <th>Tanggal Penjualan</th>
-                        <th>User</th>
+                        <th>User Input</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -59,7 +59,7 @@
                     { data: "penjualan_kode", width: "20%" },
                     { data: "pembeli", width: "20%" },
                     { data: "penjualan_tanggal", width: "20%" },
-                    { data: "user.nama", width: "20%" },
+                    { data: "user.username", width: "20%" },
                     { data: "aksi", className: "text-center", width: "15%", orderable: false, searchable: false }
                 ]
             });

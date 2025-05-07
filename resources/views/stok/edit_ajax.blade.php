@@ -26,7 +26,7 @@
         <div class="modal-body"> 
             <div class="form-group"> 
                 <label>Kode Stok</label> 
-                <input value="{{ $stok->stok_id }}" type="text" name="stok_kode" id="stok_kode" class="form-control" required> 
+                <input value="{{ $stok->stok_id }}" type="text" name="stok_kode" id="stok_kode" class="form-control"> 
                 <small id="error-stok_kode" class="error-text form-text text-danger"></small> 
             </div> 
             <div class="form-group"> 
@@ -37,7 +37,7 @@
                         <option {{ ($sp->supplier_id == $stok->supplier_id) ? 'selected' : '' }} value="{{ $sp->supplier_id }}">{{ $sp->supplier_nama }}</option> 
                     @endforeach 
                 </select> 
-                <small id="error-barang_id" class="error-text form-text text-danger"></small>
+                <small id="error-supplier_id" class="error-text form-text text-danger"></small>
             </div>
             <div class="form-group"> 
                 <label>Barang</label> 
@@ -72,7 +72,8 @@
     $(document).ready(function() { 
         $("#form-edit").validate({ 
             rules: { 
-                stok_kode: { required: true, minlength: 3, maxlength: 20 }, 
+                stok_id: { required: true, minlength: 3, maxlength: 20 }, 
+                supplier_id: { required: true, number: true },
                 stok_nama: { required: true, minlength: 3, maxlength: 100 }, 
                 stok_jumlah: { required: true, number: true }, 
                 stok_tanggal: { required: true, date: true }, 

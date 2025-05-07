@@ -71,6 +71,7 @@
                 harga_beli: { required: true, number: true }, 
                 harga_jual: { required: true, number: true }, 
                 kategori_id: { required: true, number: true }, 
+                supplier_id: { required: true, number: true }
             }, 
             submitHandler: (form) => { 
                 $.ajax({ 

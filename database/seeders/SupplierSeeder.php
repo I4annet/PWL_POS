@@ -17,18 +17,21 @@ class SupplierSeeder extends Seeder
             [
                 'supplier_kode' => 'SP-001',
                 'nama_supplier' => 'PT. Astra Honda Motor',
+                'supplier_alamat' => 'Jl. Raya No. 1, Jakarta',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'supplier_kode' => 'SP-002',
                 'nama_supplier' => 'PT. Mayora',
+                'supplier_alamat' => 'Jl. Raya No. 2, Jakarta',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'supplier_kode' => 'SP-003',
                 'nama_supplier' => 'PT. Indofood',
+                'supplier_alamat' => 'Jl. Raya No. 3, Jakarta',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

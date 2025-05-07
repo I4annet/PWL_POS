@@ -9,16 +9,20 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\BarangModel;
+use App\Models\Penjualan_DetailModel;
+use App\Models\StokModel;
+use Illuminate\Support\Facades\DB;
 
 class PenjualanController extends Controller
 {
     public function index() {
         $breadcrumb = (object) [
-            'title' => 'Penjualan',
+            'title' => 'Daftar Penjualan',
             'list' => ['Home', 'penjualan']
         ];
         $page = (object) [
-            'title' => 'Penjualan',
+            'title' => 'Daftar Penjualan',
         ];
         $activeMenu = 'penjualan';
 
@@ -40,53 +44,99 @@ class PenjualanController extends Controller
             return $penjualan->user->username ?? '-';
         })
         ->addColumn('aksi', function ($penjualan) {
-            $btn  = '<a href="'.url('/penjualan/' . $penjualan->user_id).'" class="btn btn-info btn-sm">Detail</a> ';
-            $btn .= '<a href="'.url('/penjualan/' . $penjualan->user_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
-            $btn .= '<form class="d-inline-block" method="POST" action="'.url('/penjualan/'.$penjualan->user_id).'">'
-                    . csrf_field() . method_field('DELETE') .  
-                    '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">
-                        Hapus
-                    </button>
-                </form>';      
-            return $btn;
+                $btn = '<button onclick="modalAction(\'' . url('/penjualan/' . $penjualan->penjualan_id . '/show_ajax') . '\')" class="btn btn-info btn-sm">Detail</button>';
+                $btn .= '<button onclick="modalAction(\'' . url('/penjualan/' . $penjualan->penjualan_id . '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button>';
+                $btn .= '<button onclick="modalAction(\'' . url('/penjualan/' . $penjualan->penjualan_id . '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button>';
+                return $btn;
         })
         ->rawColumns(['aksi'])
         ->make(true);
     }
 
     public function create_ajax() {
-        return view('penjualan.create_ajax'); // asumsi tidak butuh relasi lain, sesuaikan jika butuh data user atau produk
+        $user = UserModel::select('user_id', 'username')->get();
+        $barang = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'harga_jual')->get();
+
+        return view('penjualan.create_ajax')
+            ->with('user', $user)
+            ->with('barang', $barang);
     }
     
     public function store_ajax(Request $request) {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'penjualan_kode' => 'required|string|min:3|unique:t_penjualan,penjualan_kode',
-                'pembeli' => 'required|string|max:100',
-                'penjualan_tanggal' => 'required|date',
-                'user_id' => 'required|integer' // jika user terkait
-            ];
-    
-            $validator = Validator::make($request->all(), $rules);
-    
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Validasi Gagal',
-                    'msgfield' => $validator->errors(),
-                ]);
-            }
-    
-            PenjualanModel::create($request->all());
+        $validator = Validator::make($request->all(), [
+            // 'user_id' => 'required|exists:m_user,user_id',
+            'pembeli' => 'required|string|max:50',
+            'penjualan_tanggal' => 'required|date',
+            'barang_id' => 'required|array|min:1',
+            'barang_id.*' => 'required|exists:m_barang,barang_id',
+            'jumlah.*' => 'required|integer|min:1',
+            'harga.*' => 'required|numeric|min:0'
+        ]);
+
+        if ($validator->fails()) {
             return response()->json([
-                'status' => true,
-                'message' => 'Data penjualan berhasil disimpan'
+                'status' => false,
+                'message' => 'Validasi gagal',
+                'msgField' => $validator->errors()
             ]);
         }
+
+        try {
+            DB::beginTransaction();
+            $permintaan = [];
+            foreach ($request->barang_id as $index => $barang_id) {
+                $permintaan[$barang_id] = ($permintaan[$barang_id] ?? 0) + $request->jumlah[$index];
+            }
+
+            foreach ($permintaan as $barang_id => $totalJumlah) {
+                $barang = BarangModel::find($barang_id);
+                $sisaStok = $barang->getStok();
     
-        return redirect('/penjualan');
+                if ($sisaStok < $totalJumlah) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Stok barang '{$barang->barang_nama}' tidak mencukupi. Sisa stok: {$sisaStok}, dibutuhkan: {$totalJumlah}"
+                    ]);
+                }
+            }
+
+            $lastId = PenjualanModel::max('penjualan_id') ?? 0;
+            $kode = 'PJ-' . str_pad($lastId + 1, 4, '0', STR_PAD_LEFT);
+
+            $penjualan = PenjualanModel::create([
+                // 'user_id' => $request->user_id,
+                'user_id' => auth()->user()->user_id,
+                'pembeli' => $request->pembeli,
+                'penjualan_kode' => $kode,
+                'penjualan_tanggal' => $request->penjualan_tanggal
+            ]);
+
+            foreach ($request->barang_id as $index => $barang_id) {
+                $jumlah = $request->jumlah[$index];
+                $harga = $request->harga[$index];
+
+                Penjualan_DetailModel::create([
+                    'penjualan_id' => $penjualan->penjualan_id,
+                    'barang_id' => $barang_id,
+                    'harga' => $harga,
+                    'jumlah' => $jumlah
+                ]);                
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Data penjualan berhasil disimpan',
+                'data' => $penjualan
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage()
+            ]);
+        }
     }
-    
     public function edit_ajax(string $id) {
         $penjualan = PenjualanModel::find($id);
         return view('penjualan.edit_ajax', compact('penjualan'));
@@ -155,9 +205,17 @@ class PenjualanController extends Controller
     }
     
     public function show_ajax(string $id) {
-        $penjualan = PenjualanModel::find($id);
-        return view('penjualan.show_ajax', compact('penjualan'));
-    }
+        $penjualan = PenjualanModel::with(['penjualan_detail', 'user'])->find($id);
+            if ($penjualan) {
+                return view('penjualan.show_ajax', compact('penjualan', 'user', 'barang'));
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data penjualan tidak ditemukan'
+                ]);
+            }
+        
+        }
     public function import() {
         return view('penjualan.import');
     }
@@ -230,28 +288,26 @@ public function export_excel() {
     $sheet->setCellValue('B1', 'Kode Penjualan');
     $sheet->setCellValue('C1', 'Kode User');
     $sheet->setCellValue('D1', 'Pembeli');
-    $sheet->setCellValue('E1', 'Kode Penjualan');
-    $sheet->setCellValue('F1', 'Tanggal Penjualan');
+    $sheet->setCellValue('E1', 'Tanggal Penjualan');
 
-    $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+    $sheet->getStyle('A1:E1')->getFont()->setBold(true);
 
     $no = 1;
     $baris = 2;
 
     foreach ($penjualan as $value) {
         $sheet->setCellValue('A'.$baris, $no);
-        $sheet->setCellValue('B'.$baris, $value->penjualan_id);
-        $sheet->setCellValue('C'.$baris, $value->user->user_id);
+        $sheet->setCellValue('B'.$baris, $value->penjualan_kode);
+        $sheet->setCellValue('C'.$baris, $value->user->username);
         $sheet->setCellValue('D'.$baris, $value->pembeli);
-        $sheet->setCellValue('E'.$baris, $value->penjualan_kode);
-        $sheet->setCellValue('F'.$baris, $value->penjualan_tanggal);
+        $sheet->setCellValue('E'.$baris, $value->penjualan_tanggal);
 
         $baris++;
         $no++;
 
     }
 
-    foreach(range('A', 'F') as $columnID) {
+    foreach(range('A', 'E') as $columnID) {
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 

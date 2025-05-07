@@ -1,9 +1,9 @@
 @extends('layouts.template')
 
 @section('content')
-    <div class="card">
+    <div class="card card-outline card-primary">
         <div class="card-header">
-            <h3 class="card-title">Daftar Stok Barang</h3>
+            <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
                 <button onclick="modalAction('{{ url('/stok/import') }}')" class="btn btn-sm btn-info mt-1">Import Stok</button>
                 <a href="{{ url('/stok/export_excel') }}" class="btn btn-sm btn-primary mt-1"><i class="fa fa-file-excel"></i> Export Excel Stok</a>
@@ -30,6 +30,18 @@
                                 <small class="form-text text-muted">Nama Barang</small>
                             </div>
                         </div>
+                        {{-- <div class="form-group form-group-sm row text-sm mb-0">
+                            <label for="filter_supplier" class="col-md-1 col-form-label">Filter</label>
+                            <div class="col-md-3">
+                                <select name="supplier_id" class="form-control" id="supplier_id" required>
+                                    <option value="">- Semua Supplier -</option>
+                                    @foreach ($supplier as $s)
+                                        <option value="{{ $s->supplier_id }}">{{ $s->supplier_nama }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Nama Supplier</small>
+                            </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

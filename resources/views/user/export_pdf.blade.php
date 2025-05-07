@@ -93,21 +93,23 @@
         </tr>
     </table>
 
-    <h3 class="text-center">LAPORAN DATA KATEGORI</h3>
+    <h3 class="text-center">LAPORAN DATA USER</h3>
     <table class="border-all">
         <thead>
             <tr>
                 <th class="text-center">No</th>
-                <th>Kode Kategori</th>
-                <th>Nama Kategori</th>
+                <th>Username</th>
+                <th>Nama</th>
+                <th>Level Pengguna</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($kategori as $k)
+            @foreach ($user as $u)
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
-                    <td>{{ $k->kategori_kode }}</td>
-                    <td>{{ $k->kategori_nama }}</td>
+                    <td>{{ $u->username}}</td>
+                    <td>{{ $u->nama}}</td>
+                    <td>{{ $u->level->level_nama }}</td>
                 </tr>
             @endforeach
         </tbody>

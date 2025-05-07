@@ -93,21 +93,23 @@
         </tr>
     </table>
 
-    <h3 class="text-center">LAPORAN DATA KATEGORI</h3>
+    <h3 class="text-center">LAPORAN DATA Supplier</h3>
     <table class="border-all">
         <thead>
             <tr>
                 <th class="text-center">No</th>
-                <th>Kode Kategori</th>
-                <th>Nama Kategori</th>
+                <th>Kode Supplier</th>
+                <th>Nama Supplier</th>
+                <th>Alamat Supplier</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($kategori as $k)
+            @foreach ($supplier as $s)
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
-                    <td>{{ $k->kategori_kode }}</td>
-                    <td>{{ $k->kategori_nama }}</td>
+                    <td>{{ $s->supplier_kode }}</td>
+                    <td>{{ $s->supplier_nama }}</td>
+                    <td>{{ $s->supplier_alamat }}</td>
                 </tr>
             @endforeach
         </tbody>

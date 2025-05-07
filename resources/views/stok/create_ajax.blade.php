@@ -3,9 +3,9 @@
     <div id="modal-stok" class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Tambah Data Stok</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Tambah Data Stok</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                    <span>&times;</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -30,8 +30,18 @@
                     <small id="error-barang_id" class="error-text form-text text-danger"></small>
                 </div>
                 <div class="form-group">
+                    <label>Nama Input</label>
+                    <select name="user_id" id="user_id" class="form-control" required>
+                        <option value="">- Pilih User -</option>
+                        @foreach($user as $u)
+                            <option value="{{ $u->user_id }}">{{ $u->username }}</option>
+                        @endforeach
+                    </select>
+                    <small id="error-user_id" class="error-text form-text text-danger"></small>
+                </div>
+                <div class="form-group">
                     <label>Jumlah Stok</label>
-                    <input type="number" name="stok_jumlah" id="stok_jumlah" class="form-control" required>
+                    <input type="text" name="stok_jumlah" id="stok_jumlah" class="form-control" required>
                     <small id="error-stok_jumlah" class="error-text form-text text-danger"></small>
                 </div>
                 <div class="form-group">
@@ -51,11 +61,11 @@
     $(document).ready(function () {
         $("#form-tambah-stok").validate({
             rules: {
-                barang_id: { required: true, number: true },
                 supplier_id: { required: true, number: true },
+                barang_id: { required: true, number: true },
+                user_id: { required: true, number: true },
                 stok_jumlah: { required: true, number: true, min: 1 },
                 stok_tanggal: { required: true, date: true },
-                user_id: { required: true, number: true }
             },
             submitHandler: function (form) {
                 $.ajax({
@@ -64,7 +74,7 @@
                     data: $(form).serialize(),
                     success: (response) => {
                         if (response.status) {
-                            $("#modal-stok").modal('hide');
+                            $("#myModal").modal('hide');
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Berhasil',

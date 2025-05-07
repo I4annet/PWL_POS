@@ -15,20 +15,18 @@ class StokSeeder extends Seeder
     {
         DB::table('t_stok')->insert([
             [
+                'supplier_id' => 1,
                 'barang_id' => 1,
+                'user_id' => 2,
                 'stok_tanggal' => now(),
                 'stok_jumlah' => 10,
-                'stok_keterangan' => 'Tersedia',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
+                'supplier_id' => 1,
                 'barang_id' => 2,
+                'user_id' => 2,
                 'stok_tanggal' => now(),
                 'stok_jumlah' => 20,
-                'stok_keterangan' => 'Tersedia',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
         ]);
     }

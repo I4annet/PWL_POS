@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\LevelModel;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LevelController extends Controller
 {
@@ -36,17 +38,19 @@ class LevelController extends Controller
     {
         $level = LevelModel::select('level_id', 'level_kode', 'level_nama');
 
+        if ($request->level_id){
+            $level->where('level_id', $request->level_id);
+        }
+
         return DataTables::of($level)
             ->addIndexColumn()
             ->addColumn('aksi', function ($level) {
-                $btn  = '<a href="'.url('/level/' . $level->level_id).'" class="btn btn-info btn-sm">Detail</a> ';
-                $btn .= '<a href="'.url('/level/' . $level->level_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
-                $btn .= '<form class="d-inline-block" method="POST" action="'.url('/level/'.$level->level_id).'">'
-                        . csrf_field() . method_field('DELETE') .  
-                        '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">
-                            Hapus
-                        </button>
-                    </form>';      
+                $btn  = '<button onclick="modalAction(\''.url('/level/' . $level->level_id . 
+                '/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button> '; 
+                            $btn .= '<button onclick="modalAction(\''.url('/level/' . $level->level_id . 
+                '/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button> '; 
+                            $btn .= '<button onclick="modalAction(\''.url('/level/' . $level->level_id . 
+                '/delete_ajax').'\')"  class="btn btn-danger btn-sm">Hapus</button> ';  
 
                 return $btn; 
             })
@@ -264,6 +268,120 @@ class LevelController extends Controller
                 ]);
             }
         }
-        return redirect('/level'); // Adjust the redirect path as necessary
+        return redirect('/level'); 
+    }
+
+    public function import(){
+        return view('level.import');
+    }
+
+    public function import_ajax(Request $request){
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'file_level' => ['required', 'mimes:xlsx', 'max:1024']
+            ];
+    
+            $validator = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgField' => $validator->errors()
+                ]);
+            }
+    
+            $file = $request->file('file_level');
+            $reader = IOFactory::createReader('Xlsx');
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($file->getRealPath());
+            $sheet = $spreadsheet->getActiveSheet();
+            $data = $sheet->toArray(null, false, true, true);
+    
+            $insert = [];
+            if (count($data) > 1) {
+                foreach ($data as $baris => $value) {
+                    if ($baris > 1) {
+                        $insert[] = [
+                            'level_id' => $value['A'],
+                            'level_kode' => $value['B'],
+                            'level_nama' => $value['C'],
+                        ];
+                    }
+                }
+    
+                if (count($insert) > 0) {
+                    LevelModel::insertOrIgnore($insert);
+                }
+    
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data level berhasil diimport!'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Tidak ada data yang diimport!'
+                ]);
+            }
+        }
+    
+        return redirect('/');
+    }
+
+    public function export_excel() {
+        $level = LevelModel::select('level_id', 'level_kode', 'level_nama')->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kode Level');
+        $sheet->setCellValue('C1', 'Nama level');
+
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+
+        $no = 1;
+        $baris = 2;
+
+        foreach ($level as $data) {
+            $sheet->setCellValue('A' . $baris, $no);           
+            $sheet->setCellValue('B' . $baris, $data->level_kode);
+            $sheet->setCellValue('C' . $baris, $data->level_nama);
+        
+            $no++;
+            $baris++;
+        }
+        
+
+        foreach(range('A', 'C') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'level_user_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+        
+        $writer->save('php://output');
+
+        exit;
+    }
+
+     public function export_pdf() {
+        $level = LevelModel::select('level_id', 'level_kode', 'level_nama')->get();
+    
+        $pdf = Pdf::loadView('level.export_pdf', ['level' => $level]);
+        $pdf->setPaper('a4', 'portrait');
+        $pdf->setOption("isRemoteEnabled", true);
+        $pdf->render();
+    
+        return $pdf->stream('Data_level_' . date('Y-m-d_His') . '.pdf');
     }
 }

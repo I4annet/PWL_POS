@@ -44,7 +44,7 @@
                     <select name="supplier_id" id="supplier_id" class="form-control" required>
                         <option value="">- Pilih Supplier -</option>
                         @foreach($supplier as $s)
-                            <option value="{{ $s->id }}">{{ $s->nama_supplier }}</option>
+                            <option value="{{ $s->supplier_id }}">{{ $s->supplier_nama }}</option>
                         @endforeach
                     </select>
                     <small id="error-supplier_id" class="error-text form-text text-danger"></small>
@@ -81,8 +81,7 @@
                                 icon: 'success',
                                 title: 'Berhasil',
                                 text: response.message
-                            });
-                            // Optionally, reload the barang table or perform other actions
+                            });     
                             $('#table_barang').DataTable().ajax.reload();
                         } else {
                             $('.error-text').text('');

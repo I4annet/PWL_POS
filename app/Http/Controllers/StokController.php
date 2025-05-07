@@ -11,13 +11,14 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\SupplierModel;
 use App\Models\UserModel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class StokController extends Controller
 {
     public function index()
     {
         $breadcrumb = (object) [
-            'title' => 'Stok',
+            'title' => 'Daftar Stok',
             'list' => ['Home', 'stok']
         ];
 
@@ -70,12 +71,15 @@ class StokController extends Controller
     }
 
     public function create_ajax() {
-     
-    $supplier = SupplierModel::all();
-    $barang = BarangModel::all();
+    
+        $supplier = SupplierModel::select('supplier_id', 'supplier_nama')->get();
+        $barang = BarangModel::select('barang_id', 'barang_nama')->get();
+        $user = UserModel::select('user_id', 'username')->get();
 
-    // Return the view with the necessary data
-    return view('stok.create_ajax', compact('supplier', 'barang'));
+        return view('stok.create_ajax')
+            ->with('supplier', $supplier)
+            ->with('barang', $barang)
+            ->with('user', $user);
 }
 
     public function store_ajax(Request $request) {
@@ -83,8 +87,9 @@ class StokController extends Controller
         $rules = [
             'supplier_id'    => 'required|integer|exists:m_supplier,supplier_id',
             'barang_id'      => 'required|integer|exists:m_barang,barang_id',
-            'stok_tanggal'   => 'required|date',
+            'user_id'        => 'required|integer|exists:m_user,user_id',
             'stok_jumlah'    => 'required|numeric|min:1',
+            'stok_tanggal'   => 'required|date',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -96,25 +101,34 @@ class StokController extends Controller
                 'msgfield' => $validator->errors(),
             ]);
         }
-
+        
         StokModel::create($request->all());
-
+        
         return response()->json([
             'status' => true,
             'message' => 'Data stok berhasil disimpan'
         ]);
     }
-
+    
     return redirect('/stok');
 }
+public function edit_ajax(string $id) {
+    $stok = StokModel::find($id);
+    $barang = BarangModel::all();
+    $supplier = SupplierModel::all();
+    $user = UserModel::all(); 
 
-    public function update_ajax(Request $request, string $id) {
-            if ($request->ajax() || $request->wantsJson()) {
-                $rules = [
+    return view('stok.edit_ajax', compact('stok', 'barang', 'supplier', 'user'));
+}
+
+public function update_ajax(Request $request, string $id) {
+    if ($request->ajax() || $request->wantsJson()) {
+        $rules = [
                     'supplier_id'    => 'required|integer|exists:m_supplier,supplier_id',
                     'barang_id'      => 'required|integer|exists:m_barang,barang_id',
                     'stok_tanggal'   => 'required|date',
                     'stok_jumlah'    => 'required|numeric|min:1',
+                    'user_id'        => 'required|integer|exists:m_user,user_id',
                 ];
         
                 $validator = Validator::make($request->all(), $rules);
@@ -129,7 +143,7 @@ class StokController extends Controller
         
                 $stok = StokModel::find($id);
                 if ($stok) {
-                    $stok->update([
+                    $stok->create([
                         'supplier_id'   => $request->supplier_id,
                         'barang_id'     => $request->barang_id,
                         'stok_tanggal'  => $request->stok_tanggal,
@@ -152,16 +166,33 @@ class StokController extends Controller
             return redirect('/');
     }
 
-    public function edit_ajax(string $id) {
-        $barang = BarangModel::all();
-        $supplier = SupplierModel::all(); 
-    
-        return view('stok.edit_ajax', compact('stok', 'barang', 'supplier'));
+    public function show_ajax(string $id) {
+        $stok = StokModel::with(['barang', 'supplier', 'user'])->find($id);
+        return view('stok.show_ajax', ['stok' => $stok]);
     }
 
     public function confirm_ajax(string $id) {
         $stok = StokModel::find($id);
         return view ('stok.confirm_ajax', ['stok' => $stok]);
+    }
+
+    public function delete_ajax(Request $request, $id) {
+        if ($request->ajax() || $request->wantsJson()) {
+            $stok = StokModel::find($id);
+            if ($stok) {
+                $stok->delete();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data Stok berhasil dihapus'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data Stok tidak ditemukan'
+                ]);
+            }
+        }
+        return redirect('/stok'); 
     }
 
     public function import(){
@@ -197,8 +228,7 @@ class StokController extends Controller
                     $insert[] = [
                         'barang_id'       => $value['A'],
                         'stok_tanggal'    => \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value['B']),
-                        'stok_jumlah'     => $value['C'],
-                        'stok_keterangan' => $value['D'] ?? null,
+                        'stok_jumlah'     => $value['C']
                     ];
                 }
             }
@@ -222,35 +252,44 @@ class StokController extends Controller
     return redirect('/');
 }
     public function export_excel() {
-        $stok = StokModel::with('barang')->get();
+        $stok = StokModel::with(['barang', 'supplier', 'user'])
+        ->orderBy('barang_id')
+        ->get();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         $sheet->setCellValue('A1', 'No');
-        $sheet->setCellValue('B1', 'Barang ID');
-        $sheet->setCellValue('C1', 'Tanggal Stok');
-        $sheet->setCellValue('D1', 'Jumlah Stok');
-        $sheet->setCellValue('E1', 'Keterangan');
+        $sheet->setCellValue('B1', 'Nama Supplier');
+        $sheet->setCellValue('C1', 'Nama Barang');
+        $sheet->setCellValue('D1', 'User Input');
+        $sheet->setCellValue('E1', 'Tanggal Stok');
+        $sheet->setCellValue('F1', 'Jumlah Stok');
+    
 
-        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
 
         $no = 1;
         $baris = 2;
 
         foreach ($stok as $data) {
             $sheet->setCellValue('A' . $baris, $no);
-            $sheet->setCellValue('B' . $baris, $data->barang_id);
-            $sheet->setCellValue('C' . $baris, \PhpOffice\PhpSpreadsheet\Shared\Date::dateTimeToExcel(new \DateTime($data->stok_tanggal)));
-            $sheet->setCellValue('D' . $baris, $data->stok_jumlah);
-            $sheet->setCellValue('E' . $baris, $data->stok_keterangan);
+            $sheet->setCellValue('B' . $baris, $data->supplier->supplier_nama ?? '-');
+            $sheet->setCellValue('C' . $baris, $data->barang->barang_nama ?? '-');
+            $sheet->setCellValue('D' . $baris, $data->user->username ?? '-');
+            $sheet->setCellValue('E' . $baris, Date::dateTimeToExcel(new \DateTime($data->stok_tanggal)));
+            $sheet->getStyle('E' . $baris)
+                  ->getNumberFormat()
+                  ->setFormatCode('yyyy-mm-dd');
+            $sheet->setCellValue('F' . $baris, $data->stok_jumlah);
+    
         
             $no++;
             $baris++;
         }
         
 
-        foreach(range('A', 'E') as $column) {
+        foreach(range('A', 'F') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
@@ -272,10 +311,9 @@ class StokController extends Controller
     }
 
      public function export_pdf() {
-        $stok = StokModel::select('stok_id', 'barang_id', 'stok_tanggal', 'stok_jumlah', 'stok_keterangan')
-            ->orderBy('barang_id')
-            ->with('barang') // asumsi relasi kategori sudah didefinisikan di StokModel
-            ->get();
+        $stok = StokModel::with(['barang', 'supplier', 'user'])
+        ->orderBy('barang_id')
+        ->get();
     
         $pdf = Pdf::loadView('stok.export_pdf', ['stok' => $stok]);
         $pdf->setPaper('a4', 'portrait');

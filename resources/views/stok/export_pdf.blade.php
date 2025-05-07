@@ -98,25 +98,23 @@
     <table class="border-all">
         <thead>
             <tr>
-                <th class="text-center">No</th>
-                <th>Kode Barang</th>
+                <th>No</th>
+                <th>Nama Supplier</th>
                 <th>Nama Barang</th>
-                <th class="text-right">Harga Beli</th>
-                <th class="text-right">Harga Jual</th>
-                <th>Jumlah</th>
-                <th>Kategori</th>
+                <th>User Input</th>
+                <th>Tanggal Stok</th>
+                <th>Jumlah Stok</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($stok as $s)
+            @foreach ($stok as $index => $s)
                 <tr>
-                    <td class="text-center">{{ $loop->iteration }}</td>
-                    <td>{{ $s->barang->barang_kode ?? '-' }}</td>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $s->supplier->supplier_nama ?? '-' }}</td>
                     <td>{{ $s->barang->barang_nama ?? '-' }}</td>
-                    <td class="text-right">{{ number_format($s->barang->harga_beli ?? 0, 0, ',', '.') }}</td>
-                    <td class="text-right">{{ number_format($s->barang->harga_jual ?? 0, 0, ',', '.') }}</td>
-                    <td class="text-center">{{ $s->stok_jumlah }}</td>
-                    <td>{{ $s->barang->kategori->kategori_nama ?? '-' }}</td>
+                    <td>{{ $s->user->username ?? '-' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($s->stok_tanggal)->format('Y-m-d') }}</td>
+                    <td>{{ $s->stok_jumlah }}</td>
                 </tr>
             @endforeach
         </tbody>

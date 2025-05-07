@@ -120,12 +120,18 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
         // Semua route di dalam group ini harus punya role ADM (Administrator) pada menu Level
         Route::middleware(['authorize:ADM'])->group(function () {
             Route::get('/level', [LevelController::class, 'index']);         
-            Route::post('/level/list', [LevelController::class, 'list']);     
-            Route::get('/level/create', [LevelController::class, 'create']);   
-            Route::post('/level', [LevelController::class, 'store']);
-            Route::get('/level/{id}/edit', [LevelController::class, 'edit']);
-            Route::put('/level/{id}', [LevelController::class, 'update']);
-            Route::get('/level/{id}/', [LevelController::class, 'destroy']);
+            Route::post('/level/list', [LevelController::class, 'list']);
+            Route::get('/create_ajax', [LevelController::class, 'create_ajax']);
+            Route::post('/ajax', [LevelController::class, 'store_ajax']);
+            Route::get('/{id}/edit_ajax', [LevelController::class, 'edit_ajax']); 
+            Route::put('/{id}/update_ajax', [LevelController::class, 'update_ajax']);  
+            Route::get('/{id}/delete_ajax', [LevelController::class, 'confirm_ajax']);  
+            Route::delete('/{id}/delete_ajax', [LevelController::class, 'delete_ajax']);
+            Route::get('/level/import', [LevelController::class, 'import']);
+            Route::post('/level/import_ajax', [LevelController::class, 'import_ajax']);
+            Route::get('/level/export_excel', [LevelController::class, 'export_excel']);
+            Route::get('/level/export_pdf', [LevelController::class, 'export_pdf']);        
+           
         });
 
         // Route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager) pada menu User
@@ -137,7 +143,11 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
             Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']); 
             Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);  
             Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);  
-            Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);  
+            Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);
+            Route::get('/user/import', [UserController::class, 'import']);
+            Route::post('/user/import_ajax', [UserController::class, 'import_ajax']);
+            Route::get('/user/export_excel', [UserController::class, 'export_excel']);
+            Route::get('/user/export_pdf', [UserController::class, 'export_pdf']);  
         });
 
          // Route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager) pada menu Supplier
@@ -145,11 +155,15 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
             Route::get('/', [SupplierController::class, 'index']);   
             Route::post('/list', [SupplierController::class, 'list']);
             Route::get('/create_ajax', [SupplierController::class, 'create_ajax']);
-            Route::post('/ajax', [SupplierController::class, 'store_ajax']);
+            Route::post('/supplier/ajax', [SupplierController::class, 'store_ajax']);
             Route::get('/{id}/edit_ajax', [SupplierController::class, 'edit_ajax']); 
             Route::put('/{id}/update_ajax', [SupplierController::class, 'update_ajax']);  
             Route::get('/{id}/delete_ajax', [SupplierController::class, 'confirm_ajax']);  
-            Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']);  
+            Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']);
+            Route::get('/supplier/import', [SupplierController::class, 'import']);
+            Route::post('/supplier/import_ajax', [SupplierController::class, 'import_ajax']);
+            Route::get('/supplier/export_excel', [SupplierController::class, 'export_excel']);
+            Route::get('/supplier/export_pdf', [SupplierController::class, 'export_pdf']);   
         });
 
          // Route di dalam group ini harus punya role ADM (Administrator), MNG (Manager), dan STF (Staff) pada menu Kategori 
@@ -158,10 +172,15 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
             Route::post('/list', [KategoriController::class, 'list']);
             Route::get('/create_ajax', [KategoriController::class, 'create_ajax']);
             Route::post('/ajax', [KategoriController::class, 'store_ajax']);
+            Route::get('/{id}/show_ajax', [KategoriController::class, 'show_ajax']);
             Route::get('/{id}/edit_ajax', [KategoriController::class, 'edit_ajax']); 
             Route::put('/{id}/update_ajax', [KategoriController::class, 'update_ajax']);  
             Route::get('/{id}/delete_ajax', [KategoriController::class, ' confirm_ajax']);  
-            Route::delete('/{id}/delete_ajax', [KategoriController::class, 'delete_ajax']);  
+            Route::delete('/{id}/delete_ajax', [KategoriController::class, 'delete_ajax']);
+            Route::get('/kategori/import', [KategoriController::class, 'import']);
+            Route::post('/kategori/import_ajax', [KategoriController::class, 'import_ajax']);
+            Route::get('/kategori/export_excel', [KategoriController::class, 'export_excel']);
+            Route::get('/kategori/export_pdf', [KategoriController::class, 'export_pdf']);  
         });
 
          // Route di dalam group ini harus punya role ADM (Administrator), MNG (Manager), dan STF (Staff) pada menu Barang
@@ -169,7 +188,7 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
             Route::get('/', [BarangController::class, 'index']);   
             Route::post('/list', [BarangController::class, 'list']);
             Route::get('/create_ajax', [BarangController::class, 'create_ajax']);
-            Route::post('/ajax', [BarangController::class, 'store_ajax']);
+            Route::post('/stok/ajax', [BarangController::class, 'store_ajax']);
             Route::get('/{id}/edit_ajax', [BarangController::class, 'edit_ajax']); 
             Route::put('/{id}/update_ajax', [BarangController::class, 'update_ajax']);  
             Route::get('/{id}/delete_ajax', [BarangController::class, ' confirm_ajax']);  
@@ -184,10 +203,10 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
             Route::get('/stok', [StokController::class, 'index']);
             Route::post('/stok/list', [StokController::class, 'list']);
             Route::get('/stok/create_ajax', [StokController::class, 'create_ajax']);
-            Route::post('/ajax', [StokController::class, 'store_ajax']);
+            Route::post('/stok/ajax', [StokController::class, 'store_ajax']);
             Route::get('/stok/{id}/edit_ajax', [StokController::class, 'edit_ajax']); 
             Route::put('/stok/{id}/update_ajax', [StokController::class, 'update_ajax']);
-            Route::get('/stok/{id}/delete_ajax', [StokController::class, 'confirm_ajax']);
+            Route::get('/stok/{id}/delete   _ajax', [StokController::class, 'confirm_ajax']);
             Route::delete('/stok/{id}/delete_ajax', [StokController::class, 'delete_ajax']);
             Route::get('/stok/import', [StokController::class, 'import']);
             Route::post('/stok/import_ajax', [StokController::class, 'import_ajax']);
@@ -202,6 +221,7 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
             Route::get('/penjualan/create_ajax', [PenjualanController::class, 'create_ajax']);
             Route::post('/penjualan/ajax', [PenjualanController::class, 'store_ajax']);
             Route::get('/penjualan/{id}/edit_ajax', [PenjualanController::class, 'edit_ajax']);
+            Route::get('/penjualan/{id}/show_ajax', [PenjualanController::class, 'show_ajax']);
             Route::put('/penjualan/{id}/update_ajax', [PenjualanController::class, 'update_ajax']);
             Route::get('/penjualan/{id}/delete_ajax', [PenjualanController::class, 'confirm_ajax']);
             Route::delete('/penjualan/{id}/delete_ajax', [PenjualanController::class, 'delete_ajax']);
